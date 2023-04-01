@@ -27,6 +27,14 @@ pub fn move_camera(
             transform.translation +=
                 rotation * Vec3::new(1.0, 0.0, 0.0) * time.delta_seconds() * CAMERA_MOVE_SPEED;
         }
+        if keyboard_input.pressed(KeyCode::Space) {
+            transform.translation +=
+                rotation * Vec3::new(0.0, 1.0, 0.0) * time.delta_seconds() * CAMERA_MOVE_SPEED;
+        }
+        if keyboard_input.pressed(KeyCode::LControl) {
+            transform.translation +=
+                rotation * Vec3::new(0.0, -1.0, 0.0) * time.delta_seconds() * CAMERA_MOVE_SPEED;
+        }
         let (mut delta_x, mut delta_y) = (0.0, 0.0);
         for ev in motion_evr.iter() {
             delta_x += ev.delta.x;
