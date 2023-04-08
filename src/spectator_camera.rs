@@ -11,30 +11,26 @@ pub fn move_camera(
 ) {
 	for mut transform in query.iter_mut() {
 		let rotation = transform.rotation;
+		let mut movement = Vec3::new(0.0, 0.0, 0.0);
 		if keyboard_input.pressed(KeyCode::W) {
-			transform.translation +=
-				rotation * Vec3::new(0.0, 0.0, -1.0) * time.delta_seconds() * CAMERA_MOVE_SPEED;
+			movement += Vec3::new(0.0, 0.0, -1.0) ;
 		}
 		if keyboard_input.pressed(KeyCode::S) {
-			transform.translation +=
-				rotation * Vec3::new(0.0, 0.0, 1.0) * time.delta_seconds() * CAMERA_MOVE_SPEED;
+			movement += Vec3::new(0.0, 0.0, 1.0);
 		}
 		if keyboard_input.pressed(KeyCode::A) {
-			transform.translation +=
-				rotation * Vec3::new(-1.0, 0.0, 0.0) * time.delta_seconds() * CAMERA_MOVE_SPEED;
+			movement += Vec3::new(-1.0, 0.0, 0.0);
 		}
 		if keyboard_input.pressed(KeyCode::D) {
-			transform.translation +=
-				rotation * Vec3::new(1.0, 0.0, 0.0) * time.delta_seconds() * CAMERA_MOVE_SPEED;
+			movement += Vec3::new(1.0, 0.0, 0.0);
 		}
 		if keyboard_input.pressed(KeyCode::Space) {
-			transform.translation +=
-				rotation * Vec3::new(0.0, 1.0, 0.0) * time.delta_seconds() * CAMERA_MOVE_SPEED;
+			movement += Vec3::new(0.0, 1.0, 0.0);
 		}
 		if keyboard_input.pressed(KeyCode::LControl) {
-			transform.translation +=
-				rotation * Vec3::new(0.0, -1.0, 0.0) * time.delta_seconds() * CAMERA_MOVE_SPEED;
+			movement += Vec3::new(0.0, -1.0, 0.0);
 		}
+		transform.translation += rotation * movement.normalize_or_zero() * time.delta_seconds() * CAMERA_MOVE_SPEED;
 		let (mut delta_x, mut delta_y) = (0.0, 0.0);
 		for ev in motion_evr.iter() {
 			delta_x += ev.delta.x;
