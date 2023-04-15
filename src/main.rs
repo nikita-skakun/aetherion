@@ -55,10 +55,7 @@ fn setup(
     setup_escape_menu(commands, asset_server);
 }
 
-fn setup_escape_menu(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
+fn setup_escape_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn(NodeBundle {
             style: Style {
@@ -76,29 +73,60 @@ fn setup_escape_menu(
             parent
                 .spawn(NodeBundle {
                     style: Style {
-                        size: Size::new(Val::Px(200.0), Val::Px(100.0)),
+                        size: Size::new(Val::Px(200.0), Val::Auto),
+                        flex_direction: FlexDirection::Column,
                         justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
+                        padding: UiRect::all(Val::Px(10.0)),
                         ..Default::default()
                     },
                     background_color: Color::rgb(0.2, 0.2, 0.2).into(),
                     ..Default::default()
                 })
                 .with_children(|parent| {
-                    parent.spawn(
-                        TextBundle::from_section(
-                            "Escape Menu",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 30.0,
-                                color: Color::WHITE,
+                    // Settings button
+                    parent
+                        .spawn(ButtonBundle {
+                            style: Style {
+                                size: Size::new(Val::Percent(100.0), Val::Auto),
+                                margin: UiRect::all(Val::Px(5.0)),
+                                ..Default::default()
                             },
-                        )
-                        .with_style(Style {
-                            margin: UiRect::all(Val::Px(5.)),
+                            background_color: Color::rgb(0.15, 0.15, 0.15).into(),
                             ..Default::default()
-                        }),
-                    );
+                        })
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle::from_section(
+                                "Settings",
+                                TextStyle {
+                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                    font_size: 20.0,
+                                    color: Color::WHITE,
+                                },
+                            ));
+                        });
+
+                    // Exit button
+                    parent
+                        .spawn(ButtonBundle {
+                            style: Style {
+                                size: Size::new(Val::Percent(100.0), Val::Auto),
+                                margin: UiRect::all(Val::Px(5.0)),
+                                ..Default::default()
+                            },
+                            background_color: Color::rgb(0.15, 0.15, 0.15).into(),
+                            ..Default::default()
+                        })
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle::from_section(
+                                "Exit",
+                                TextStyle {
+                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                    font_size: 20.0,
+                                    color: Color::WHITE,
+                                },
+                            ));
+                        });
                 });
         })
         .insert(EscapeMenuTag { visible: false });
@@ -111,7 +139,7 @@ fn set_cursor_lock(mut windows: Query<&mut Window>, cursor_lock_state: Res<Curso
         window.cursor.grab_mode = CursorGrabMode::Locked;
     } else {
         window.cursor.visible = true;
-        window.cursor.grab_mode = CursorGrabMode::Confined;
+        window.cursor.grab_mode = CursorGrabMode::None;
     }
 }
 
