@@ -2,8 +2,9 @@ mod input;
 mod spectator_camera;
 
 use bevy::{
+    app::AppExit,
     prelude::*,
-    window::{CursorGrabMode, PresentMode}, app::AppExit,
+    window::{CursorGrabMode, PresentMode},
 };
 
 use leafwing_input_manager::{prelude::InputManagerPlugin, InputManagerBundle};
@@ -19,6 +20,9 @@ struct CursorLockState(bool);
 
 #[derive(Component)]
 struct EscapeMenuExitButtonTag;
+
+#[derive(Component)]
+struct EscapeMenuSettingsButtonTag;
 
 fn setup(
     mut commands: Commands,
@@ -59,81 +63,94 @@ fn setup(
 }
 
 fn setup_escape_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands
+    let canvas = commands
         .spawn(NodeBundle {
             style: Style {
                 size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                flex_direction: FlexDirection::ColumnReverse,
                 justify_content: JustifyContent::Center,
-                display: Display::None,
                 align_items: AlignItems::Center,
+                display: Display::None,
                 ..Default::default()
             },
-            background_color: Color::NONE.into(),
+            ..Default::default()
+        })
+        .insert(EscapeMenuTag { visible: false })
+        .id();
+
+    let escape_menu_bg = commands
+        .spawn(NodeBundle {
+            style: Style {
+                size: Size::new(Val::Auto, Val::Auto),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                flex_direction: FlexDirection::Column,
+                ..Default::default()
+            },
+            background_color: Color::rgba(0.0, 0.0, 0.0, 0.7).into(),
+            ..Default::default()
+        })
+        .id();
+
+    commands.entity(canvas).push_children(&[escape_menu_bg]);
+
+    // Settings button
+    create_escape_menu_button(
+        &mut commands,
+        escape_menu_bg,
+        canvas,
+        "Settings",
+        Some(EscapeMenuSettingsButtonTag),
+        &asset_server,
+    );
+
+    // Exit button
+    create_escape_menu_button(
+        &mut commands,
+        escape_menu_bg,
+        canvas,
+        "Exit",
+        Some(EscapeMenuExitButtonTag),
+        &asset_server,
+    );
+}
+
+fn create_escape_menu_button(
+    commands: &mut Commands,
+    menu_background: Entity,
+    parent: Entity,
+    text: &str,
+    tag: Option<impl Component>,
+    asset_server: &AssetServer,
+) -> Entity {
+    let button = commands
+        .spawn(ButtonBundle {
+            style: Style {
+                size: Size::new(Val::Px(200.0), Val::Auto),
+                margin: UiRect::all(Val::Px(5.0)),
+                ..Default::default()
+            },
+            background_color: Color::rgb(0.15, 0.15, 0.15).into(),
             ..Default::default()
         })
         .with_children(|parent| {
-            parent
-                .spawn(NodeBundle {
-                    style: Style {
-                        size: Size::new(Val::Px(200.0), Val::Auto),
-                        flex_direction: FlexDirection::Column,
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        padding: UiRect::all(Val::Px(10.0)),
-                        ..Default::default()
-                    },
-                    background_color: Color::rgb(0.2, 0.2, 0.2).into(),
-                    ..Default::default()
-                })
-                .with_children(|parent| {
-                    // Settings button
-                    parent
-                        .spawn(ButtonBundle {
-                            style: Style {
-                                size: Size::new(Val::Percent(100.0), Val::Auto),
-                                margin: UiRect::all(Val::Px(5.0)),
-                                ..Default::default()
-                            },
-                            background_color: Color::rgb(0.15, 0.15, 0.15).into(),
-                            ..Default::default()
-                        })
-                        .with_children(|parent| {
-                            parent.spawn(TextBundle::from_section(
-                                "Settings",
-                                TextStyle {
-                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                    font_size: 20.0,
-                                    color: Color::WHITE,
-                                },
-                            ));
-                        });
-
-                    // Exit button
-                    parent
-                        .spawn(ButtonBundle {
-                            style: Style {
-                                size: Size::new(Val::Percent(100.0), Val::Auto),
-                                margin: UiRect::all(Val::Px(5.0)),
-                                ..Default::default()
-                            },
-                            background_color: Color::rgb(0.15, 0.15, 0.15).into(),
-                            ..Default::default()
-                        })
-                        .insert(EscapeMenuExitButtonTag)
-                        .with_children(|parent| {
-                            parent.spawn(TextBundle::from_section(
-                                "Exit",
-                                TextStyle {
-                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                    font_size: 20.0,
-                                    color: Color::WHITE,
-                                },
-                            ));
-                        });
-                });
+            parent.spawn(TextBundle::from_section(
+                text,
+                TextStyle {
+                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                    font_size: 20.0,
+                    color: Color::WHITE,
+                },
+            ));
         })
-        .insert(EscapeMenuTag { visible: false });
+        .id();
+
+    if let Some(tag) = tag {
+        commands.entity(button).insert(tag);
+    }
+
+    commands.entity(parent).push_children(&[button]);
+    commands.entity(menu_background).push_children(&[button]);
+    button
 }
 
 fn set_cursor_lock(mut windows: Query<&mut Window>, cursor_lock_state: Res<CursorLockState>) {
@@ -181,7 +198,6 @@ fn exit_button_system(
         }
     }
 }
-
 
 fn main() {
     App::new()
