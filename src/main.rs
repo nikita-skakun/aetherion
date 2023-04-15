@@ -80,10 +80,11 @@ fn setup_escape_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     let escape_menu_bg = commands
         .spawn(NodeBundle {
             style: Style {
-                size: Size::new(Val::Auto, Val::Auto),
+                size: Size::new(Val::Px(300.0), Val::Auto),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 flex_direction: FlexDirection::Column,
+                padding: UiRect::all(Val::Px(8.0)),
                 ..Default::default()
             },
             background_color: Color::rgba(0.0, 0.0, 0.0, 0.7).into(),
@@ -125,22 +126,30 @@ fn create_escape_menu_button(
     let button = commands
         .spawn(ButtonBundle {
             style: Style {
-                size: Size::new(Val::Px(200.0), Val::Auto),
-                margin: UiRect::all(Val::Px(5.0)),
+                size: Size::new(Val::Percent(100.0), Val::Auto),
+                margin: UiRect::all(Val::Px(8.0)),
+                justify_content: JustifyContent::Center,
                 ..Default::default()
             },
             background_color: Color::rgb(0.15, 0.15, 0.15).into(),
             ..Default::default()
         })
         .with_children(|parent| {
-            parent.spawn(TextBundle::from_section(
-                text,
-                TextStyle {
-                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                    font_size: 20.0,
-                    color: Color::WHITE,
+            parent.spawn(TextBundle {
+                style: Style {
+                    margin: UiRect::all(Val::Px(8.0)),
+                    ..Default::default()
                 },
-            ));
+                text: Text::from_section(
+                    text,
+                    TextStyle {
+                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                        font_size: 32.0,
+                        color: Color::WHITE,
+                    }
+                ),
+                ..Default::default()
+            });            
         })
         .id();
 
