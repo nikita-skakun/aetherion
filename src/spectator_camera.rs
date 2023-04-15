@@ -1,10 +1,11 @@
-pub use bevy::{input::mouse::MouseMotion, prelude::*};
+use bevy::{input::mouse::MouseMotion, prelude::*};
 use leafwing_input_manager::{
     prelude::{ActionState, InputMap},
     InputManagerBundle,
 };
 
 use crate::input::Action;
+use crate::menu_focus::CursorLockState;
 
 const CAMERA_MOVE_SPEED: f32 = 5.0;
 const CAMERA_VIEW_SPEED: f32 = 3.0;
@@ -13,7 +14,11 @@ pub fn move_camera(
     time: Res<Time>,
     mut motion_evr: EventReader<MouseMotion>,
     mut query: Query<(&ActionState<Action>, &mut Transform), With<Camera3d>>,
+    cursor_lock_state: Res<CursorLockState>,
 ) {
+    if !cursor_lock_state.0 {
+        return;
+    }
     let (action_state, mut transform) = query.single_mut();
     let rotation = transform.rotation;
     let mut movement = Vec3::new(0.0, 0.0, 0.0);

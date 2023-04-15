@@ -1,4 +1,5 @@
 mod input;
+mod menu_focus;
 mod spectator_camera;
 
 use bevy::{
@@ -8,15 +9,13 @@ use bevy::{
 };
 
 use leafwing_input_manager::{prelude::InputManagerPlugin, InputManagerBundle};
+use menu_focus::CursorLockState;
 use spectator_camera::*;
 
 #[derive(Component)]
 struct EscapeMenuTag {
     visible: bool,
 }
-
-#[derive(Resource)]
-struct CursorLockState(bool);
 
 #[derive(Component)]
 struct EscapeMenuExitButtonTag;
@@ -146,10 +145,10 @@ fn create_escape_menu_button(
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: 32.0,
                         color: Color::WHITE,
-                    }
+                    },
                 ),
                 ..Default::default()
-            });            
+            });
         })
         .id();
 
