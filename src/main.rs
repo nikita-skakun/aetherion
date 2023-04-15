@@ -1,9 +1,12 @@
+mod input;
 mod spectator_camera;
 
 use bevy::{
     prelude::*,
     window::{CursorGrabMode, PresentMode},
 };
+
+use leafwing_input_manager::{prelude::InputManagerPlugin, InputManagerBundle};
 use spectator_camera::*;
 
 /// set up a simple 3D scene
@@ -29,10 +32,15 @@ fn setup(
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
         ..default()
     });
-    // camera
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0.0, 2.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
+    commands.spawn(SpectatorCameraBundle {
+        input_manager: InputManagerBundle {
+            input_map: SpectatorCameraBundle::default_input_map(),
+            ..default()
+        },
+        camera: Camera3dBundle {
+            transform: Transform::from_xyz(0.0, 2.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+            ..default()
+        },
     });
 }
 
@@ -63,6 +71,7 @@ fn main() {
             }),
             ..default()
         }))
+        .add_plugin(InputManagerPlugin::<input::Action>::default())
         .add_startup_system(setup)
         .add_startup_system(toggle_cursor_lock)
         .add_system(move_camera)
