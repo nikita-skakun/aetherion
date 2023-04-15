@@ -17,21 +17,20 @@ struct EscapeMenuTag {
 #[derive(Resource)]
 struct CursorLockState(bool);
 
-/// set up a simple 3D scene
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
-    // cube
+    // Sample Cube
     commands.spawn(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
         material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
         transform: Transform::from_xyz(0.0, 0.5, 0.0),
         ..default()
     });
-    // light
+    // Light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
             intensity: 1500.0,
@@ -41,6 +40,7 @@ fn setup(
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
         ..default()
     });
+    // Spectator Camera
     commands.spawn(SpectatorCameraBundle {
         input_manager: InputManagerBundle {
             input_map: SpectatorCameraBundle::default_input_map(),
@@ -51,7 +51,14 @@ fn setup(
             ..default()
         },
     });
+    // Escape Menu
+    setup_escape_menu(commands, asset_server);
+}
 
+fn setup_escape_menu(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+) {
     commands
         .spawn(NodeBundle {
             style: Style {
