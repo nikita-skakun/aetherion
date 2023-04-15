@@ -3,10 +3,7 @@ mod menu_focus;
 mod spectator_camera;
 mod ui_menu;
 
-use bevy::{
-    prelude::*,
-    window::PresentMode,
-};
+use bevy::{prelude::*, window::PresentMode};
 
 use leafwing_input_manager::{prelude::InputManagerPlugin, InputManagerBundle};
 use menu_focus::CursorLockState;

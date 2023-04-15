@@ -1,4 +1,4 @@
-use bevy::{prelude::*, app::AppExit, window::CursorGrabMode};
+use bevy::{app::AppExit, prelude::*, window::CursorGrabMode};
 
 use crate::menu_focus::CursorLockState;
 
@@ -132,14 +132,12 @@ pub fn escape_menu(
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
         for (mut escape_menu_tag, mut style) in escape_menu_tag.iter_mut() {
-            if escape_menu_tag.visible {
-                style.display = Display::None;
-                cursor_lock_state.0 = true;
-            } else {
-                style.display = Display::Flex;
-                cursor_lock_state.0 = false;
-            }
+            style.display = match escape_menu_tag.visible {
+                true => Display::None,
+                false => Display::Flex,
+            };
             escape_menu_tag.visible = !escape_menu_tag.visible;
+            cursor_lock_state.0 = !escape_menu_tag.visible;
         }
         set_cursor_lock(windows, cursor_lock_state.into());
     }
