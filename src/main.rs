@@ -3,7 +3,7 @@ mod spectator_camera;
 
 use bevy::{
     prelude::*,
-    window::{CursorGrabMode, PresentMode},
+    window::{CursorGrabMode, PresentMode}, app::AppExit,
 };
 
 use leafwing_input_manager::{prelude::InputManagerPlugin, InputManagerBundle};
@@ -16,6 +16,9 @@ struct EscapeMenuTag {
 
 #[derive(Resource)]
 struct CursorLockState(bool);
+
+#[derive(Component)]
+struct EscapeMenuExitButtonTag;
 
 fn setup(
     mut commands: Commands,
@@ -117,6 +120,7 @@ fn setup_escape_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                             background_color: Color::rgb(0.15, 0.15, 0.15).into(),
                             ..Default::default()
                         })
+                        .insert(EscapeMenuExitButtonTag)
                         .with_children(|parent| {
                             parent.spawn(TextBundle::from_section(
                                 "Exit",
@@ -164,6 +168,21 @@ fn escape_menu(
     }
 }
 
+fn exit_button_system(
+    mut app_exit_events: EventWriter<AppExit>,
+    button_interaction_query: Query<
+        (&Interaction, &EscapeMenuExitButtonTag),
+        (Changed<Interaction>, With<Button>),
+    >,
+) {
+    for (interaction, _) in button_interaction_query.iter() {
+        if *interaction == Interaction::Clicked {
+            app_exit_events.send(AppExit);
+        }
+    }
+}
+
+
 fn main() {
     App::new()
         .insert_resource(CursorLockState(true))
@@ -182,5 +201,6 @@ fn main() {
         .add_startup_system(set_cursor_lock)
         .add_system(move_camera)
         .add_system(escape_menu)
+        .add_system(exit_button_system)
         .run();
 }
