@@ -111,18 +111,19 @@ fn set_cursor_lock(mut windows: Query<&mut Window>, cursor_lock_state: Res<Curso
 fn escape_menu(
     keyboard_input: Res<Input<KeyCode>>,
     windows: Query<&mut Window>,
-    mut escape_menu_tag: Query<(&EscapeMenuTag, &mut Style)>,
+    mut escape_menu_tag: Query<(&mut EscapeMenuTag, &mut Style)>,
     mut cursor_lock_state: ResMut<CursorLockState>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        for (_, mut style) in escape_menu_tag.iter_mut() {
-            if let Display::None = style.display {
-                style.display = Display::Flex;
-                cursor_lock_state.0 = false;
-            } else {
+        for (mut escape_menu_tag, mut style) in escape_menu_tag.iter_mut() {
+            if escape_menu_tag.visible {
                 style.display = Display::None;
                 cursor_lock_state.0 = true;
+            } else {
+                style.display = Display::Flex;
+                cursor_lock_state.0 = false;
             }
+            escape_menu_tag.visible = !escape_menu_tag.visible;
         }
         set_cursor_lock(windows, cursor_lock_state.into());
     }
