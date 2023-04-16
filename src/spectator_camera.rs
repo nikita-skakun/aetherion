@@ -21,29 +21,18 @@ pub fn move_camera(
     }
     let (action_state, mut transform) = query.single_mut();
     let rotation = transform.rotation;
-    let mut movement = Vec3::new(0.0, 0.0, 0.0);
 
-    if action_state.pressed(Action::Forward) {
-        movement += Vec3::new(0.0, 0.0, -1.0);
-    }
-    if action_state.pressed(Action::Backward) {
-        movement += Vec3::new(0.0, 0.0, 1.0);
-    }
-    if action_state.pressed(Action::Left) {
-        movement += Vec3::new(-1.0, 0.0, 0.0);
-    }
-    if action_state.pressed(Action::Right) {
-        movement += Vec3::new(1.0, 0.0, 0.0);
-    }
-    if action_state.pressed(Action::Jump) {
-        movement += Vec3::new(0.0, 1.0, 0.0);
-    }
-    if action_state.pressed(Action::Crouch) {
-        movement += Vec3::new(0.0, -1.0, 0.0);
-    }
+    let movement = Vec3::new(
+        (action_state.pressed(Action::Right) as i32 - action_state.pressed(Action::Left) as i32) as f32,
+        (action_state.pressed(Action::Jump) as i32 - action_state.pressed(Action::Crouch) as i32) as f32,
+        (action_state.pressed(Action::Backward) as i32 - action_state.pressed(Action::Forward) as i32) as f32,
+    );
+
     transform.translation +=
         rotation * movement.normalize_or_zero() * time.delta_seconds() * CAMERA_MOVE_SPEED;
-    let (mut delta_x, mut delta_y) = (0.0, 0.0);
+
+    let mut delta_x = 0.0;
+    let mut delta_y = 0.0;
     for ev in motion_evr.iter() {
         delta_x += ev.delta.x;
         delta_y += ev.delta.y;
