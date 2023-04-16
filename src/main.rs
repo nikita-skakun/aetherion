@@ -44,8 +44,8 @@ fn setup(
             ..default()
         },
     });
-    // Escape Menu
-    setup_escape_menu(commands, asset_server);
+    // UI Menus
+    setup_ui(commands, asset_server);
 }
 
 fn main() {
@@ -66,6 +66,5 @@ fn main() {
         .add_startup_system(set_cursor_lock)
         .add_system(move_camera)
         .add_system(escape_menu)
-        .add_system(exit_button_system)
         .run();
 }
