@@ -16,3 +16,5 @@ opt-level = 3
 [dependencies]
 bevy = { version = "0.10.1", features = ["dynamic_linking"] }
 leafwing-input-manager = "0.9.1"
+strum = "0.24.1"
+strum_macros = "0.24.3"

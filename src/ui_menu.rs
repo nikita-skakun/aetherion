@@ -1,6 +1,7 @@
 use bevy::{app::AppExit, prelude::*, window::CursorGrabMode};
+use strum::IntoEnumIterator;
 
-use crate::menu_focus::CursorLockState;
+use crate::{input::Action, menu_focus::CursorLockState};
 
 #[derive(Component)]
 pub struct EscapeMenuTag {
@@ -71,7 +72,7 @@ fn setup_escape_menu(commands: &mut Commands, asset_server: &Res<AssetServer>, c
     );
 }
 
-fn setup_settings_menu(commands: &mut Commands, canvas: Entity) {
+fn setup_settings_menu(commands: &mut Commands, asset_server: &Res<AssetServer>, canvas: Entity) {
     let settings_menu_bg = commands
         .spawn(NodeBundle {
             style: Style {
@@ -85,6 +86,25 @@ fn setup_settings_menu(commands: &mut Commands, canvas: Entity) {
             },
             background_color: Color::rgba(0.0, 0.0, 0.0, 0.7).into(),
             ..Default::default()
+        })
+        .with_children(|parent| {
+            for action in Action::iter() {
+                parent.spawn(TextBundle {
+                    style: Style {
+                        margin: UiRect::all(Val::Px(8.0)),
+                        ..Default::default()
+                    },
+                    text: Text::from_section(
+                        action.to_string(),
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 32.0,
+                            color: Color::WHITE,
+                        },
+                    ),
+                    ..Default::default()
+                });
+            }
         })
         .insert(SettingsMenuTag { visible: false })
         .id();
@@ -209,5 +229,5 @@ pub fn escape_menu(
 pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let canvas = setup_canvas(&mut commands);
     setup_escape_menu(&mut commands, &asset_server, canvas);
-    setup_settings_menu(&mut commands, canvas);
+    setup_settings_menu(&mut commands, &asset_server, canvas);
 }
