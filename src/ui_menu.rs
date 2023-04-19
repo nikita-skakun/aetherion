@@ -1,7 +1,7 @@
 use bevy::{
     app::AppExit,
     prelude::*,
-    window::{CursorGrabMode, WindowMode},
+    window::{CursorGrabMode, PresentMode, WindowMode},
 };
 use bevy_egui::{
     egui::{self, Align2},
@@ -134,6 +134,21 @@ pub fn ui_menu(
                                     WindowMode::Fullscreen => WindowMode::Windowed,
                                     _ => WindowMode::Windowed,
                                 };
+                            }
+
+                            if ui
+                                .button(match window.present_mode {
+                                    PresentMode::AutoVsync => "Vsync",
+                                    PresentMode::AutoNoVsync => "No Vsync",
+                                    _ => "Other?",
+                                })
+                                .clicked()
+                            {
+                                window.present_mode = match window.present_mode {
+                                    PresentMode::AutoVsync => PresentMode::AutoNoVsync,
+                                    PresentMode::AutoNoVsync => PresentMode::AutoVsync,
+                                    _ => PresentMode::AutoVsync,
+                                }
                             }
                         }
                         SettingsTabOption::Controls => {
