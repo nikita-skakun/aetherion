@@ -1,4 +1,8 @@
-use bevy::{app::AppExit, prelude::*, window::CursorGrabMode};
+use bevy::{
+    app::AppExit,
+    prelude::*,
+    window::{CursorGrabMode, WindowMode},
+};
 use bevy_egui::{
     egui::{self, Align2},
     EguiContexts,
@@ -25,8 +29,12 @@ pub enum SettingsTabOption {
     Debug,
 }
 
-pub fn set_cursor_lock(mut windows: Query<&mut Window>, cursor_lock_state: Res<CursorLockState>) {
+pub fn setup_ui(mut windows: Query<&mut Window>, cursor_lock_state: Res<CursorLockState>) {
     let mut window = windows.single_mut();
+    set_cursor_lock(&mut window, cursor_lock_state);
+}
+
+pub fn set_cursor_lock(window: &mut Window, cursor_lock_state: Res<CursorLockState>) {
     if cursor_lock_state.0 {
         window.cursor.visible = false;
         window.cursor.grab_mode = CursorGrabMode::Locked;
@@ -37,7 +45,7 @@ pub fn set_cursor_lock(mut windows: Query<&mut Window>, cursor_lock_state: Res<C
 }
 
 pub fn ui_menu(
-    windows: Query<&mut Window>,
+    mut windows: Query<&mut Window>,
     mut contexts: EguiContexts,
     mut app_exit_events: EventWriter<AppExit>,
     mut input_query: Query<&ActionState<Action>, With<Camera3d>>,
@@ -45,12 +53,12 @@ pub fn ui_menu(
     mut cursor_lock_state: ResMut<CursorLockState>,
 ) {
     let action_state = input_query.single_mut();
+    let mut window = windows.single_mut();
 
     if action_state.just_pressed(Action::Exit) {
         let mut escape_used = false;
         if !escape_used && visibility.settings_menu {
             visibility.settings_menu = false;
-            visibility.escape_menu = true;
             escape_used = true;
         }
 
@@ -62,7 +70,7 @@ pub fn ui_menu(
 
         let ui_window_open = visibility.escape_menu || visibility.settings_menu;
         cursor_lock_state.0 = !ui_window_open;
-        set_cursor_lock(windows, cursor_lock_state.into());
+        set_cursor_lock(&mut window, cursor_lock_state.into());
     }
 
     if visibility.escape_menu {
@@ -88,6 +96,7 @@ pub fn ui_menu(
             .resizable(false)
             .collapsible(false)
             .anchor(Align2::CENTER_CENTER, [0., 0.])
+            // .default_width(window.width() / 3.0 * 2.0)
             .show(contexts.ctx_mut(), |ui| {
                 ui.horizontal(|ui| {
                     for tab_option in SettingsTabOption::iter() {
@@ -103,10 +112,34 @@ pub fn ui_menu(
 
                 ui.vertical_centered_justified(|ui| {
                     match visibility.settings_tab_option {
-                        SettingsTabOption::General => {}
-                        SettingsTabOption::Audio => {}
-                        SettingsTabOption::Graphics => {}
-                        SettingsTabOption::Controls => {}
+                        SettingsTabOption::General => {
+                            ui.label("Nothing here yet :)");
+                        }
+                        SettingsTabOption::Audio => {
+                            ui.label("Nothing here yet :)");
+                        }
+                        SettingsTabOption::Graphics => {
+                            if ui
+                                .button(match window.mode {
+                                    WindowMode::Windowed => "Windowed",
+                                    WindowMode::BorderlessFullscreen => "Borderless Fullscreen",
+                                    WindowMode::Fullscreen => "Fullscreen",
+                                    _ => "Other?",
+                                })
+                                .clicked()
+                            {
+                                window.mode = match window.mode {
+                                    WindowMode::Windowed => WindowMode::BorderlessFullscreen,
+                                    WindowMode::BorderlessFullscreen => WindowMode::Fullscreen,
+                                    WindowMode::Fullscreen => WindowMode::Windowed,
+                                    _ => WindowMode::Windowed,
+                                };
+                            }
+                        }
+                        SettingsTabOption::Controls => {
+                            //https://github.com/Leafwing-Studios/leafwing-input-manager/blob/main/examples/binding_menu.rs
+                            ui.label("Nothing here yet :)");
+                        }
                         SettingsTabOption::Debug => {
                             ui.label("Nothing here yet :)");
                         }

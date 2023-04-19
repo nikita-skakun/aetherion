@@ -3,7 +3,7 @@ mod menu_focus;
 mod spectator_camera;
 mod ui_menu;
 
-use bevy::{prelude::*, window::PresentMode};
+use bevy::{prelude::*, window::{PresentMode, WindowMode}};
 use bevy_egui::EguiPlugin;
 
 use leafwing_input_manager::{prelude::InputManagerPlugin, InputManagerBundle};
@@ -56,6 +56,7 @@ fn main() {
                 present_mode: PresentMode::AutoVsync,
                 fit_canvas_to_parent: true,
                 prevent_default_event_handling: false,
+                mode: WindowMode::BorderlessFullscreen,
                 ..default()
             }),
             ..default()
@@ -63,7 +64,7 @@ fn main() {
         .add_plugin(EguiPlugin)
         .add_plugin(InputManagerPlugin::<input::Action>::default())
         .add_startup_system(setup)
-        .add_startup_system(set_cursor_lock)
+        .add_startup_system(setup_ui)
         .add_system(move_camera)
         .add_system(ui_menu)
         .run();
