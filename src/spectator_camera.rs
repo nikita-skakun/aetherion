@@ -23,9 +23,12 @@ pub fn move_camera(
     let rotation = transform.rotation;
 
     let movement = Vec3::new(
-        (action_state.pressed(Action::Right) as i32 - action_state.pressed(Action::Left) as i32) as f32,
-        (action_state.pressed(Action::Jump) as i32 - action_state.pressed(Action::Crouch) as i32) as f32,
-        (action_state.pressed(Action::Backward) as i32 - action_state.pressed(Action::Forward) as i32) as f32,
+        (action_state.pressed(Action::Right) as i32 - action_state.pressed(Action::Left) as i32)
+            as f32,
+        (action_state.pressed(Action::Jump) as i32 - action_state.pressed(Action::Crouch) as i32)
+            as f32,
+        (action_state.pressed(Action::Backward) as i32
+            - action_state.pressed(Action::Forward) as i32) as f32,
     );
 
     transform.translation +=
@@ -52,6 +55,9 @@ impl SpectatorCameraBundle {
     pub fn default_input_map() -> InputMap<Action> {
         use Action::*;
         let mut input_map = InputMap::default();
+
+        //UI
+        input_map.insert(KeyCode::Escape, Exit);
 
         //Movement
         input_map.insert(KeyCode::W, Forward);

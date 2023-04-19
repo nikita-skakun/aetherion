@@ -4,6 +4,7 @@ mod spectator_camera;
 mod ui_menu;
 
 use bevy::{prelude::*, window::PresentMode};
+use bevy_egui::EguiPlugin;
 
 use leafwing_input_manager::{prelude::InputManagerPlugin, InputManagerBundle};
 use menu_focus::CursorLockState;
@@ -14,7 +15,6 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    asset_server: Res<AssetServer>,
 ) {
     // Sample Cube
     commands.spawn(PbrBundle {
@@ -44,13 +44,12 @@ fn setup(
             ..default()
         },
     });
-    // UI Menus
-    setup_ui(commands, asset_server);
 }
 
 fn main() {
     App::new()
         .insert_resource(CursorLockState(true))
+        .insert_resource(UiVisibility { escape_menu: false, settings_menu: false, settings_tab_option: SettingsTabOption::General })
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "Aetherion".into(),
@@ -61,10 +60,11 @@ fn main() {
             }),
             ..default()
         }))
+        .add_plugin(EguiPlugin)
         .add_plugin(InputManagerPlugin::<input::Action>::default())
         .add_startup_system(setup)
         .add_startup_system(set_cursor_lock)
         .add_system(move_camera)
-        .add_system(escape_menu)
+        .add_system(ui_menu)
         .run();
 }
