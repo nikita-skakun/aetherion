@@ -11,13 +11,23 @@ use leafwing_input_manager::prelude::ActionState;
 use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter};
 
-use crate::{input::Action, menu_focus::CursorLockState, spectator_camera::ControlSettings};
+use crate::{
+    input::Action,
+    menu_focus::CursorLockState,
+    spectator_camera::{update_fov, ControlSettings},
+};
 
 #[derive(Resource)]
 pub struct UiVisibility {
     pub escape_menu: bool,
     pub settings_menu: bool,
     pub settings_tab_option: SettingsTabOption,
+}
+
+//TODO: Move somewhere else later
+#[derive(Resource)]
+pub struct GraphicsSettings {
+    pub fov: f32,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy, Hash, Debug, EnumIter, Display)]
@@ -49,9 +59,11 @@ pub fn ui_menu(
     mut contexts: EguiContexts,
     mut app_exit_events: EventWriter<AppExit>,
     mut input_query: Query<&ActionState<Action>, With<Camera3d>>,
+    projection_query: Query<&mut Projection>,
     mut visibility: ResMut<UiVisibility>,
     mut cursor_lock_state: ResMut<CursorLockState>,
     mut control_settings: ResMut<ControlSettings>,
+    mut graphics_settings: ResMut<GraphicsSettings>,
 ) {
     let action_state = input_query.single_mut();
     let mut window = windows.single_mut();
@@ -153,6 +165,19 @@ pub fn ui_menu(
                                     _ => PresentMode::AutoVsync,
                                 }
                             }
+
+                            ui.horizontal(|ui| {
+                                ui.label("Field of View");
+                                if ui
+                                    .add(
+                                        egui::Slider::new(&mut graphics_settings.fov, 30.0..=120.0)
+                                            .clamp_to_range(true),
+                                    )
+                                    .changed()
+                                {
+                                    update_fov(projection_query, graphics_settings.into());
+                                };
+                            });
                         }
                         SettingsTabOption::Controls => {
                             //https://github.com/Leafwing-Studios/leafwing-input-manager/blob/main/examples/binding_menu.rs

@@ -18,6 +18,7 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    graphics_settings: Res<GraphicsSettings>,
 ) {
     // Sample Cube
     commands.spawn(PbrBundle {
@@ -43,6 +44,10 @@ fn setup(
             ..default()
         },
         camera: Camera3dBundle {
+            projection: Projection::Perspective(PerspectiveProjection {
+                fov: graphics_settings.fov.to_radians(),
+                ..Default::default()
+            }),
             transform: Transform::from_xyz(0.0, 2.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
@@ -55,6 +60,7 @@ fn main() {
         .insert_resource(ControlSettings {
             mouse_sensitivity: 3.0,
         })
+        .insert_resource(GraphicsSettings { fov: 60.0 })
         .insert_resource(UiVisibility {
             escape_menu: false,
             settings_menu: false,

@@ -4,8 +4,8 @@ use leafwing_input_manager::{
     InputManagerBundle,
 };
 
-use crate::input::Action;
 use crate::menu_focus::CursorLockState;
+use crate::{input::Action, ui_menu::GraphicsSettings};
 
 const CAMERA_MOVE_SPEED: f32 = 5.0;
 
@@ -51,6 +51,14 @@ pub fn move_camera(
     transform.rotate_local(Quat::from_rotation_x(
         -delta_y * control_settings.mouse_sensitivity * 0.001,
     ));
+}
+
+pub fn update_fov(mut query: Query<&mut Projection>, graphics_settings: Res<GraphicsSettings>) {
+    for mut projection in query.iter_mut() {
+        if let Projection::Perspective(perspective_projection) = &mut *projection {
+            perspective_projection.fov = graphics_settings.fov.to_radians();
+        }
+    }
 }
 
 #[derive(Bundle)]
