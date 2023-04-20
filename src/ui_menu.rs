@@ -11,7 +11,7 @@ use leafwing_input_manager::prelude::ActionState;
 use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter};
 
-use crate::{input::Action, menu_focus::CursorLockState};
+use crate::{input::Action, menu_focus::CursorLockState, spectator_camera::ControlSettings};
 
 #[derive(Resource)]
 pub struct UiVisibility {
@@ -51,6 +51,7 @@ pub fn ui_menu(
     mut input_query: Query<&ActionState<Action>, With<Camera3d>>,
     mut visibility: ResMut<UiVisibility>,
     mut cursor_lock_state: ResMut<CursorLockState>,
+    mut control_settings: ResMut<ControlSettings>,
 ) {
     let action_state = input_query.single_mut();
     let mut window = windows.single_mut();
@@ -110,6 +111,8 @@ pub fn ui_menu(
                     }
                 });
 
+                ui.separator();
+
                 ui.vertical_centered_justified(|ui| {
                     match visibility.settings_tab_option {
                         SettingsTabOption::General => {
@@ -153,7 +156,16 @@ pub fn ui_menu(
                         }
                         SettingsTabOption::Controls => {
                             //https://github.com/Leafwing-Studios/leafwing-input-manager/blob/main/examples/binding_menu.rs
-                            ui.label("Nothing here yet :)");
+                            ui.horizontal(|ui| {
+                                ui.label("Mouse Sensitivity");
+                                ui.add(
+                                    egui::Slider::new(
+                                        &mut control_settings.mouse_sensitivity,
+                                        0.1..=10.0,
+                                    )
+                                    .clamp_to_range(true),
+                                );
+                            });
                         }
                         SettingsTabOption::Debug => {
                             ui.label("Nothing here yet :)");

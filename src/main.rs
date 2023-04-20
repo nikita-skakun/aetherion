@@ -3,7 +3,10 @@ mod menu_focus;
 mod spectator_camera;
 mod ui_menu;
 
-use bevy::{prelude::*, window::{PresentMode, WindowMode}};
+use bevy::{
+    prelude::*,
+    window::{PresentMode, WindowMode},
+};
 use bevy_egui::EguiPlugin;
 
 use leafwing_input_manager::{prelude::InputManagerPlugin, InputManagerBundle};
@@ -49,7 +52,14 @@ fn setup(
 fn main() {
     App::new()
         .insert_resource(CursorLockState(true))
-        .insert_resource(UiVisibility { escape_menu: false, settings_menu: false, settings_tab_option: SettingsTabOption::General })
+        .insert_resource(ControlSettings {
+            mouse_sensitivity: 3.0,
+        })
+        .insert_resource(UiVisibility {
+            escape_menu: false,
+            settings_menu: false,
+            settings_tab_option: SettingsTabOption::General,
+        })
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "Aetherion".into(),

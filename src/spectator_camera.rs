@@ -8,13 +8,18 @@ use crate::input::Action;
 use crate::menu_focus::CursorLockState;
 
 const CAMERA_MOVE_SPEED: f32 = 5.0;
-const CAMERA_VIEW_SPEED: f32 = 3.0;
+
+#[derive(Resource)]
+pub struct ControlSettings {
+    pub mouse_sensitivity: f32,
+}
 
 pub fn move_camera(
     time: Res<Time>,
     mut motion_evr: EventReader<MouseMotion>,
     mut query: Query<(&ActionState<Action>, &mut Transform), With<Camera3d>>,
     cursor_lock_state: Res<CursorLockState>,
+    control_settings: Res<ControlSettings>,
 ) {
     if !cursor_lock_state.0 {
         return;
@@ -40,8 +45,12 @@ pub fn move_camera(
         delta_x += ev.delta.x;
         delta_y += ev.delta.y;
     }
-    transform.rotate(Quat::from_rotation_y(-delta_x * CAMERA_VIEW_SPEED * 0.001));
-    transform.rotate_local(Quat::from_rotation_x(-delta_y * CAMERA_VIEW_SPEED * 0.001));
+    transform.rotate(Quat::from_rotation_y(
+        -delta_x * control_settings.mouse_sensitivity * 0.001,
+    ));
+    transform.rotate_local(Quat::from_rotation_x(
+        -delta_y * control_settings.mouse_sensitivity * 0.001,
+    ));
 }
 
 #[derive(Bundle)]
