@@ -7,14 +7,14 @@ use bevy_egui::{
     egui::{self, Align2},
     EguiContexts,
 };
+use bevy_pkv::PkvStore;
 use leafwing_input_manager::prelude::ActionState;
 use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter};
 
 use crate::{
-    input::Action,
-    menu_focus::CursorLockState,
-    spectator_camera::{update_fov, ControlSettings},
+    input::Action, menu_focus::CursorLockState, settings::*, settings_io::*,
+    spectator_camera::update_fov,
 };
 
 #[derive(Resource)]
@@ -24,12 +24,6 @@ pub struct UiVisibility {
     pub settings_tab_option: SettingsTabOption,
 }
 
-//TODO: Move somewhere else later
-#[derive(Resource)]
-pub struct GraphicsSettings {
-    pub fov: f32,
-}
-
 #[derive(PartialEq, Eq, Clone, Copy, Hash, Debug, EnumIter, Display)]
 pub enum SettingsTabOption {
     General,
@@ -37,11 +31,6 @@ pub enum SettingsTabOption {
     Graphics,
     Controls,
     Debug,
-}
-
-pub fn setup_ui(mut windows: Query<&mut Window>, cursor_lock_state: Res<CursorLockState>) {
-    let mut window = windows.single_mut();
-    set_cursor_lock(&mut window, cursor_lock_state);
 }
 
 pub fn set_cursor_lock(window: &mut Window, cursor_lock_state: Res<CursorLockState>) {
@@ -64,6 +53,7 @@ pub fn ui_menu(
     mut cursor_lock_state: ResMut<CursorLockState>,
     mut control_settings: ResMut<ControlSettings>,
     mut graphics_settings: ResMut<GraphicsSettings>,
+    mut pkv: ResMut<PkvStore>,
 ) {
     let action_state = input_query.single_mut();
     let mut window = windows.single_mut();
@@ -170,12 +160,13 @@ pub fn ui_menu(
                                 ui.label("Field of View");
                                 if ui
                                     .add(
-                                        egui::Slider::new(&mut graphics_settings.fov, 30.0..=120.0)
-                                            .clamp_to_range(true),
+                                        egui::Slider::new(&mut graphics_settings.fov, 30.0..=100.0)
+                                            .clamp_to_range(true)
                                     )
                                     .changed()
                                 {
-                                    update_fov(projection_query, graphics_settings.into());
+                                    update_fov(projection_query, &graphics_settings);
+                                    export_settings(&mut *graphics_settings, "settings.graphics", &mut pkv);
                                 };
                             });
                         }
@@ -183,13 +174,15 @@ pub fn ui_menu(
                             //https://github.com/Leafwing-Studios/leafwing-input-manager/blob/main/examples/binding_menu.rs
                             ui.horizontal(|ui| {
                                 ui.label("Mouse Sensitivity");
-                                ui.add(
+                                if ui.add(
                                     egui::Slider::new(
                                         &mut control_settings.mouse_sensitivity,
                                         0.1..=10.0,
                                     )
-                                    .clamp_to_range(true),
-                                );
+                                    .clamp_to_range(true)
+                                ).changed() {
+                                    export_settings(&mut *control_settings, "settings.control", &mut pkv);
+                                };
                             });
                         }
                         SettingsTabOption::Debug => {

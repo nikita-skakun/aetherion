@@ -4,15 +4,9 @@ use leafwing_input_manager::{
     InputManagerBundle,
 };
 
-use crate::menu_focus::CursorLockState;
-use crate::{input::Action, ui_menu::GraphicsSettings};
+use crate::{input::Action, menu_focus::CursorLockState, settings::*};
 
 const CAMERA_MOVE_SPEED: f32 = 5.0;
-
-#[derive(Resource)]
-pub struct ControlSettings {
-    pub mouse_sensitivity: f32,
-}
 
 pub fn move_camera(
     time: Res<Time>,
@@ -53,7 +47,7 @@ pub fn move_camera(
     ));
 }
 
-pub fn update_fov(mut query: Query<&mut Projection>, graphics_settings: Res<GraphicsSettings>) {
+pub fn update_fov(mut query: Query<&mut Projection>, graphics_settings: &GraphicsSettings) {
     for mut projection in query.iter_mut() {
         if let Projection::Perspective(perspective_projection) = &mut *projection {
             perspective_projection.fov = graphics_settings.fov.to_radians();
