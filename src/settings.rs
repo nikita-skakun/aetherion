@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, window::WindowMode};
 use serde::{Deserialize, Serialize};
 
 #[derive(Resource, Debug, Deserialize, Serialize, Clone, Copy)]
@@ -21,14 +21,30 @@ fn default_mouse_sensitivity() -> f32 {
 
 #[derive(Resource, Debug, Deserialize, Serialize, Clone, Copy)]
 pub struct GraphicsSettings {
+    #[serde(default = "default_window_mode")]
+    pub mode: WindowMode,
+    #[serde(default = "default_vsync")]
+    pub vsync: bool,
     #[serde(default = "default_fov")]
     pub fov: f32,
 }
 
 impl Default for GraphicsSettings {
     fn default() -> Self {
-        GraphicsSettings { fov: default_fov() }
+        GraphicsSettings {
+            fov: default_fov(),
+            vsync: default_vsync(),
+            mode: default_window_mode(),
+        }
     }
+}
+
+fn default_window_mode() -> WindowMode {
+    WindowMode::Windowed
+}
+
+fn default_vsync() -> bool {
+    true
 }
 
 fn default_fov() -> f32 {

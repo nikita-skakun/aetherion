@@ -1,21 +1,20 @@
 mod input;
 mod menu_focus;
+mod render_utils;
 mod settings;
 mod settings_io;
 mod spectator_camera;
 mod ui_menu;
 
-use bevy::{
-    prelude::*,
-    window::{PresentMode, WindowMode},
-};
+use bevy::prelude::*;
 use bevy_egui::EguiPlugin;
 
+use bevy_pkv::PkvStore;
 use leafwing_input_manager::{prelude::InputManagerPlugin, InputManagerBundle};
 use menu_focus::CursorLockState;
+use render_utils::update_window;
 use settings::*;
 use settings_io::*;
-use bevy_pkv::PkvStore;
 use spectator_camera::*;
 use ui_menu::*;
 
@@ -69,26 +68,13 @@ fn main() {
         .insert_resource(CursorLockState(true))
         .insert_resource(ControlSettings::default())
         .insert_resource(GraphicsSettings::default())
-        .insert_resource(UiVisibility {
-            escape_menu: false,
-            settings_menu: false,
-            settings_tab_option: SettingsTabOption::General,
-        })
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "Aetherion".into(),
-                present_mode: PresentMode::AutoVsync,
-                fit_canvas_to_parent: true,
-                prevent_default_event_handling: false,
-                mode: WindowMode::BorderlessFullscreen,
-                ..default()
-            }),
-            ..default()
-        }))
+        .insert_resource(UiVisibility::default())
+        .add_plugins(DefaultPlugins)
         .add_plugin(EguiPlugin)
         .add_plugin(InputManagerPlugin::<input::Action>::default())
         .add_startup_system(import_player_settings)
         .add_startup_system(setup)
+        .add_startup_system(update_window)
         .add_system(move_camera)
         .add_system(ui_menu)
         .run();

@@ -17,15 +17,16 @@ use crate::{
     spectator_camera::update_fov,
 };
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct UiVisibility {
     pub escape_menu: bool,
     pub settings_menu: bool,
     pub settings_tab_option: SettingsTabOption,
 }
 
-#[derive(PartialEq, Eq, Clone, Copy, Hash, Debug, EnumIter, Display)]
+#[derive(PartialEq, Eq, Clone, Copy, Hash, Debug, EnumIter, Display, Default)]
 pub enum SettingsTabOption {
+    #[default]
     General,
     Audio,
     Graphics,
@@ -125,7 +126,7 @@ pub fn ui_menu(
                         }
                         SettingsTabOption::Graphics => {
                             if ui
-                                .button(match window.mode {
+                                .button(match graphics_settings.mode {
                                     WindowMode::Windowed => "Windowed",
                                     WindowMode::BorderlessFullscreen => "Borderless Fullscreen",
                                     WindowMode::Fullscreen => "Fullscreen",
@@ -133,27 +134,48 @@ pub fn ui_menu(
                                 })
                                 .clicked()
                             {
-                                window.mode = match window.mode {
-                                    WindowMode::Windowed => WindowMode::BorderlessFullscreen,
-                                    WindowMode::BorderlessFullscreen => WindowMode::Fullscreen,
-                                    WindowMode::Fullscreen => WindowMode::Windowed,
-                                    _ => WindowMode::Windowed,
+                                match graphics_settings.mode {
+                                    WindowMode::Windowed => {
+                                        window.mode = WindowMode::BorderlessFullscreen;
+                                        graphics_settings.mode = WindowMode::BorderlessFullscreen;
+                                    }
+                                    WindowMode::BorderlessFullscreen => {
+                                        window.mode = WindowMode::Fullscreen;
+                                        graphics_settings.mode = WindowMode::Fullscreen;
+                                    }
+                                    WindowMode::Fullscreen => {
+                                        window.mode = WindowMode::Windowed;
+                                        graphics_settings.mode = WindowMode::Windowed;
+                                    }
+                                    _ => {
+                                        window.mode = WindowMode::Windowed;
+                                        graphics_settings.mode = WindowMode::Windowed;
+                                    }
                                 };
                             }
 
                             if ui
-                                .button(match window.present_mode {
-                                    PresentMode::AutoVsync => "Vsync",
-                                    PresentMode::AutoNoVsync => "No Vsync",
-                                    _ => "Other?",
+                                .button(match graphics_settings.vsync {
+                                    true => "Vsync",
+                                    false => "No Vsync",
                                 })
                                 .clicked()
                             {
-                                window.present_mode = match window.present_mode {
-                                    PresentMode::AutoVsync => PresentMode::AutoNoVsync,
-                                    PresentMode::AutoNoVsync => PresentMode::AutoVsync,
-                                    _ => PresentMode::AutoVsync,
-                                }
+                                match graphics_settings.vsync {
+                                    true => {
+                                        window.present_mode = PresentMode::AutoNoVsync;
+                                        graphics_settings.vsync = false;
+                                    }
+                                    false => {
+                                        window.present_mode = PresentMode::AutoVsync;
+                                        graphics_settings.vsync = true;
+                                    }
+                                };
+                                export_settings(
+                                    &mut *graphics_settings,
+                                    "settings.graphics",
+                                    &mut pkv,
+                                );
                             }
 
                             ui.horizontal(|ui| {
@@ -161,12 +183,16 @@ pub fn ui_menu(
                                 if ui
                                     .add(
                                         egui::Slider::new(&mut graphics_settings.fov, 30.0..=100.0)
-                                            .clamp_to_range(true)
+                                            .clamp_to_range(true),
                                     )
                                     .changed()
                                 {
                                     update_fov(projection_query, &graphics_settings);
-                                    export_settings(&mut *graphics_settings, "settings.graphics", &mut pkv);
+                                    export_settings(
+                                        &mut *graphics_settings,
+                                        "settings.graphics",
+                                        &mut pkv,
+                                    );
                                 };
                             });
                         }
@@ -174,14 +200,21 @@ pub fn ui_menu(
                             //https://github.com/Leafwing-Studios/leafwing-input-manager/blob/main/examples/binding_menu.rs
                             ui.horizontal(|ui| {
                                 ui.label("Mouse Sensitivity");
-                                if ui.add(
-                                    egui::Slider::new(
-                                        &mut control_settings.mouse_sensitivity,
-                                        0.1..=10.0,
+                                if ui
+                                    .add(
+                                        egui::Slider::new(
+                                            &mut control_settings.mouse_sensitivity,
+                                            0.1..=10.0,
+                                        )
+                                        .clamp_to_range(true),
                                     )
-                                    .clamp_to_range(true)
-                                ).changed() {
-                                    export_settings(&mut *control_settings, "settings.control", &mut pkv);
+                                    .changed()
+                                {
+                                    export_settings(
+                                        &mut *control_settings,
+                                        "settings.control",
+                                        &mut pkv,
+                                    );
                                 };
                             });
                         }
