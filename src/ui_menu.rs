@@ -102,7 +102,7 @@ pub fn ui_menu(
             .resizable(false)
             .collapsible(false)
             .anchor(Align2::CENTER_CENTER, [0., 0.])
-            // .default_width(window.width() / 3.0 * 2.0)
+            .default_width(window.width() / 3.0)
             .show(contexts.ctx_mut(), |ui| {
                 ui.horizontal(|ui| {
                     for tab_option in SettingsTabOption::iter() {
@@ -205,25 +205,44 @@ pub fn ui_menu(
                                     };
 
                                     ui.end_row();
-
-                                    ui.label("Field of View");
-                                    if ui
-                                        .add(
-                                            egui::Slider::new(
-                                                &mut graphics_settings.fov,
-                                                30.0..=100.0,
+                                    let mut fov_changed: bool = false;
+                                    ui.horizontal_centered(|ui| {
+                                        ui.label("Field of View");
+                                        if ui
+                                            .add_sized(
+                                                egui::Vec2::new(40.0, SETTINGS_BUTTON_HEIGHT),
+                                                egui::DragValue::new(&mut graphics_settings.fov)
+                                                    .clamp_range(30..=100),
                                             )
-                                            .clamp_to_range(true),
-                                        )
-                                        .changed()
-                                    {
+                                            .changed()
+                                        {
+                                            fov_changed = true;
+                                        };
+                                    });
+                                    ui.scope(|ui| {
+                                        ui.spacing_mut().slider_width = ui.available_width();
+                                        if ui
+                                            .add(
+                                                egui::Slider::new(
+                                                    &mut graphics_settings.fov,
+                                                    30..=100,
+                                                )
+                                                .clamp_to_range(true)
+                                                .show_value(false),
+                                            )
+                                            .changed()
+                                        {
+                                            fov_changed = true;
+                                        };
+                                    });
+                                    if fov_changed {
                                         update_fov(projection_query, &graphics_settings);
                                         export_settings(
                                             &mut *graphics_settings,
                                             "settings.graphics",
                                             &mut pkv,
                                         );
-                                    };
+                                    }
                                 });
                         }
                         SettingsTabOption::Controls => {
@@ -232,23 +251,45 @@ pub fn ui_menu(
                                 .num_columns(2)
                                 .striped(true)
                                 .show(ui, |ui| {
-                                    ui.label("Mouse Sensitivity");
-                                    if ui
-                                        .add(
-                                            egui::Slider::new(
-                                                &mut control_settings.mouse_sensitivity,
-                                                0.1..=10.0,
+                                    let mut mouse_sensitivity_changed: bool = false;
+                                    ui.horizontal_centered(|ui| {
+                                        ui.label("Mouse Sensitivity");
+                                        if ui
+                                            .add_sized(
+                                                egui::Vec2::new(40.0, SETTINGS_BUTTON_HEIGHT),
+                                                egui::DragValue::new(
+                                                    &mut control_settings.mouse_sensitivity,
+                                                )
+                                                .clamp_range(0.1..=10.0),
                                             )
-                                            .clamp_to_range(true),
-                                        )
-                                        .changed()
-                                    {
+                                            .changed()
+                                        {
+                                            mouse_sensitivity_changed = true;
+                                        };
+                                    });
+                                    ui.scope(|ui| {
+                                        ui.spacing_mut().slider_width = ui.available_width();
+                                        if ui
+                                            .add(
+                                                egui::Slider::new(
+                                                    &mut control_settings.mouse_sensitivity,
+                                                    0.1..=10.0,
+                                                )
+                                                .clamp_to_range(true)
+                                                .show_value(false),
+                                            )
+                                            .changed()
+                                        {
+                                            mouse_sensitivity_changed = true;
+                                        };
+                                    });
+                                    if mouse_sensitivity_changed {
                                         export_settings(
                                             &mut *control_settings,
                                             "settings.control",
                                             &mut pkv,
                                         );
-                                    };
+                                    }
                                 });
                         }
                         SettingsTabOption::Debug => {

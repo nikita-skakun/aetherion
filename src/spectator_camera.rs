@@ -50,7 +50,7 @@ pub fn move_camera(
 pub fn update_fov(mut query: Query<&mut Projection>, graphics_settings: &GraphicsSettings) {
     for mut projection in query.iter_mut() {
         if let Projection::Perspective(perspective_projection) = &mut *projection {
-            perspective_projection.fov = graphics_settings.fov.to_radians();
+            perspective_projection.fov = f32::to_radians(graphics_settings.fov.into());
         }
     }
 }

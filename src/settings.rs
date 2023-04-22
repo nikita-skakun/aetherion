@@ -26,7 +26,7 @@ pub struct GraphicsSettings {
     #[serde(default = "default_vsync")]
     pub vsync: bool,
     #[serde(default = "default_fov")]
-    pub fov: f32,
+    pub fov: i8,
 }
 
 impl Default for GraphicsSettings {
@@ -47,6 +47,6 @@ fn default_vsync() -> bool {
     true
 }
 
-fn default_fov() -> f32 {
-    60.0
+fn default_fov() -> i8 {
+    60
 }

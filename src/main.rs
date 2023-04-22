@@ -51,7 +51,7 @@ fn setup(
         },
         camera: Camera3dBundle {
             projection: Projection::Perspective(PerspectiveProjection {
-                fov: graphics_settings.fov.to_radians(),
+                fov: f32::to_radians(graphics_settings.fov.into()),
                 ..Default::default()
             }),
             transform: Transform::from_xyz(0.0, 2.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
