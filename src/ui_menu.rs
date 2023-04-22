@@ -4,7 +4,7 @@ use bevy::{
     window::{CursorGrabMode, PresentMode, WindowMode},
 };
 use bevy_egui::{
-    egui::{self, Align2},
+    egui::{self, Align2, Grid},
     EguiContexts,
 };
 use bevy_pkv::PkvStore;
@@ -16,6 +16,8 @@ use crate::{
     input::Action, menu_focus::CursorLockState, settings::*, settings_io::*,
     spectator_camera::update_fov,
 };
+
+const SETTINGS_BUTTON_HEIGHT: f32 = 18.0;
 
 #[derive(Resource, Default)]
 pub struct UiVisibility {
@@ -50,7 +52,7 @@ pub fn ui_menu(
     mut app_exit_events: EventWriter<AppExit>,
     mut input_query: Query<&ActionState<Action>, With<Camera3d>>,
     projection_query: Query<&mut Projection>,
-    mut visibility: ResMut<UiVisibility>,
+    mut ui_visibility: ResMut<UiVisibility>,
     mut cursor_lock_state: ResMut<CursorLockState>,
     mut control_settings: ResMut<ControlSettings>,
     mut graphics_settings: ResMut<GraphicsSettings>,
@@ -61,23 +63,23 @@ pub fn ui_menu(
 
     if action_state.just_pressed(Action::Exit) {
         let mut escape_used = false;
-        if !escape_used && visibility.settings_menu {
-            visibility.settings_menu = false;
+        if !escape_used && ui_visibility.settings_menu {
+            ui_visibility.settings_menu = false;
             escape_used = true;
         }
 
         //Insert other UI menus here
 
         if !escape_used {
-            visibility.escape_menu = !visibility.escape_menu;
+            ui_visibility.escape_menu = !ui_visibility.escape_menu;
         }
 
-        let ui_window_open = visibility.escape_menu || visibility.settings_menu;
+        let ui_window_open = ui_visibility.escape_menu || ui_visibility.settings_menu;
         cursor_lock_state.0 = !ui_window_open;
         set_cursor_lock(&mut window, cursor_lock_state.into());
     }
 
-    if visibility.escape_menu {
+    if ui_visibility.escape_menu {
         egui::Window::new("Escape Menu")
             .resizable(false)
             .collapsible(false)
@@ -85,8 +87,8 @@ pub fn ui_menu(
             .show(contexts.ctx_mut(), |ui| {
                 ui.vertical_centered_justified(|ui| {
                     if ui.button("Settings").clicked() {
-                        visibility.settings_menu = true;
-                        visibility.escape_menu = false;
+                        ui_visibility.settings_menu = true;
+                        ui_visibility.escape_menu = false;
                     }
                     if ui.button("Exit").clicked() {
                         app_exit_events.send(AppExit);
@@ -95,7 +97,7 @@ pub fn ui_menu(
             });
     }
 
-    if visibility.settings_menu {
+    if ui_visibility.settings_menu {
         egui::Window::new("Settings Menu")
             .resizable(false)
             .collapsible(false)
@@ -106,9 +108,9 @@ pub fn ui_menu(
                     for tab_option in SettingsTabOption::iter() {
                         let tab_button = ui.button(tab_option.to_string());
                         if tab_button.clicked() {
-                            visibility.settings_tab_option = tab_option;
+                            ui_visibility.settings_tab_option = tab_option;
                         }
-                        if tab_option == visibility.settings_tab_option {
+                        if tab_option == ui_visibility.settings_tab_option {
                             tab_button.highlight();
                         }
                     }
@@ -117,7 +119,7 @@ pub fn ui_menu(
                 ui.separator();
 
                 ui.vertical_centered_justified(|ui| {
-                    match visibility.settings_tab_option {
+                    match ui_visibility.settings_tab_option {
                         SettingsTabOption::General => {
                             ui.label("Nothing here yet :)");
                         }
@@ -125,98 +127,129 @@ pub fn ui_menu(
                             ui.label("Nothing here yet :)");
                         }
                         SettingsTabOption::Graphics => {
-                            if ui
-                                .button(match graphics_settings.mode {
-                                    WindowMode::Windowed => "Windowed",
-                                    WindowMode::BorderlessFullscreen => "Borderless Fullscreen",
-                                    WindowMode::Fullscreen => "Fullscreen",
-                                    _ => "Other?",
-                                })
-                                .clicked()
-                            {
-                                match graphics_settings.mode {
-                                    WindowMode::Windowed => {
-                                        window.mode = WindowMode::BorderlessFullscreen;
-                                        graphics_settings.mode = WindowMode::BorderlessFullscreen;
-                                    }
-                                    WindowMode::BorderlessFullscreen => {
-                                        window.mode = WindowMode::Fullscreen;
-                                        graphics_settings.mode = WindowMode::Fullscreen;
-                                    }
-                                    WindowMode::Fullscreen => {
-                                        window.mode = WindowMode::Windowed;
-                                        graphics_settings.mode = WindowMode::Windowed;
-                                    }
-                                    _ => {
-                                        window.mode = WindowMode::Windowed;
-                                        graphics_settings.mode = WindowMode::Windowed;
-                                    }
-                                };
-                            }
+                            Grid::new("Graphics Settings")
+                                .num_columns(2)
+                                .striped(true)
+                                .show(ui, |ui| {
+                                    ui.label("Window Mode");
 
-                            if ui
-                                .button(match graphics_settings.vsync {
-                                    true => "Vsync",
-                                    false => "No Vsync",
-                                })
-                                .clicked()
-                            {
-                                match graphics_settings.vsync {
-                                    true => {
-                                        window.present_mode = PresentMode::AutoNoVsync;
-                                        graphics_settings.vsync = false;
-                                    }
-                                    false => {
-                                        window.present_mode = PresentMode::AutoVsync;
-                                        graphics_settings.vsync = true;
-                                    }
-                                };
-                                export_settings(
-                                    &mut *graphics_settings,
-                                    "settings.graphics",
-                                    &mut pkv,
-                                );
-                            }
+                                    if ui
+                                        .add_sized(
+                                            egui::Vec2::new(
+                                                ui.available_width(),
+                                                SETTINGS_BUTTON_HEIGHT,
+                                            ),
+                                            egui::Button::new(match graphics_settings.mode {
+                                                WindowMode::Windowed => "Windowed",
+                                                WindowMode::BorderlessFullscreen => {
+                                                    "Borderless Fullscreen"
+                                                }
+                                                WindowMode::Fullscreen => "Fullscreen",
+                                                _ => "Other?",
+                                            }),
+                                        )
+                                        .clicked()
+                                    {
+                                        match graphics_settings.mode {
+                                            WindowMode::Windowed => {
+                                                window.mode = WindowMode::BorderlessFullscreen;
+                                                graphics_settings.mode =
+                                                    WindowMode::BorderlessFullscreen;
+                                            }
+                                            WindowMode::BorderlessFullscreen => {
+                                                window.mode = WindowMode::Fullscreen;
+                                                graphics_settings.mode = WindowMode::Fullscreen;
+                                            }
+                                            WindowMode::Fullscreen => {
+                                                window.mode = WindowMode::Windowed;
+                                                graphics_settings.mode = WindowMode::Windowed;
+                                            }
+                                            _ => {
+                                                window.mode = WindowMode::Windowed;
+                                                graphics_settings.mode = WindowMode::Windowed;
+                                            }
+                                        };
+                                    };
 
-                            ui.horizontal(|ui| {
-                                ui.label("Field of View");
-                                if ui
-                                    .add(
-                                        egui::Slider::new(&mut graphics_settings.fov, 30.0..=100.0)
+                                    ui.end_row();
+
+                                    ui.label("Vsync Mode");
+                                    if ui
+                                        .add_sized(
+                                            egui::Vec2::new(
+                                                ui.available_width(),
+                                                SETTINGS_BUTTON_HEIGHT,
+                                            ),
+                                            egui::Button::new(match graphics_settings.vsync {
+                                                true => "Vsync",
+                                                false => "No Vsync",
+                                            }),
+                                        )
+                                        .clicked()
+                                    {
+                                        match graphics_settings.vsync {
+                                            true => {
+                                                window.present_mode = PresentMode::AutoNoVsync;
+                                                graphics_settings.vsync = false;
+                                            }
+                                            false => {
+                                                window.present_mode = PresentMode::AutoVsync;
+                                                graphics_settings.vsync = true;
+                                            }
+                                        };
+                                        export_settings(
+                                            &mut *graphics_settings,
+                                            "settings.graphics",
+                                            &mut pkv,
+                                        );
+                                    };
+
+                                    ui.end_row();
+
+                                    ui.label("Field of View");
+                                    if ui
+                                        .add(
+                                            egui::Slider::new(
+                                                &mut graphics_settings.fov,
+                                                30.0..=100.0,
+                                            )
                                             .clamp_to_range(true),
-                                    )
-                                    .changed()
-                                {
-                                    update_fov(projection_query, &graphics_settings);
-                                    export_settings(
-                                        &mut *graphics_settings,
-                                        "settings.graphics",
-                                        &mut pkv,
-                                    );
-                                };
-                            });
+                                        )
+                                        .changed()
+                                    {
+                                        update_fov(projection_query, &graphics_settings);
+                                        export_settings(
+                                            &mut *graphics_settings,
+                                            "settings.graphics",
+                                            &mut pkv,
+                                        );
+                                    };
+                                });
                         }
                         SettingsTabOption::Controls => {
                             //https://github.com/Leafwing-Studios/leafwing-input-manager/blob/main/examples/binding_menu.rs
-                            ui.horizontal(|ui| {
-                                ui.label("Mouse Sensitivity");
-                                if ui
-                                    .add(
-                                        egui::Slider::new(
-                                            &mut control_settings.mouse_sensitivity,
-                                            0.1..=10.0,
+                            Grid::new("Graphics Settings")
+                                .num_columns(2)
+                                .striped(true)
+                                .show(ui, |ui| {
+                                    ui.label("Mouse Sensitivity");
+                                    if ui
+                                        .add(
+                                            egui::Slider::new(
+                                                &mut control_settings.mouse_sensitivity,
+                                                0.1..=10.0,
+                                            )
+                                            .clamp_to_range(true),
                                         )
-                                        .clamp_to_range(true),
-                                    )
-                                    .changed()
-                                {
-                                    export_settings(
-                                        &mut *control_settings,
-                                        "settings.control",
-                                        &mut pkv,
-                                    );
-                                };
-                            });
+                                        .changed()
+                                    {
+                                        export_settings(
+                                            &mut *control_settings,
+                                            "settings.control",
+                                            &mut pkv,
+                                        );
+                                    };
+                                });
                         }
                         SettingsTabOption::Debug => {
                             ui.label("Nothing here yet :)");
