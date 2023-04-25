@@ -105,14 +105,8 @@ pub fn ui_menu(
             .default_width(window.width() / 3.0)
             .show(contexts.ctx_mut(), |ui| {
                 ui.horizontal(|ui| {
-                    let button_width =
-                        ui.available_width() / (SettingsTabOption::iter().count() as f32 + (0.25));
-
                     for tab_option in SettingsTabOption::iter() {
-                        let response = ui.add_sized(
-                            [button_width, SETTINGS_BUTTON_HEIGHT],
-                            egui::Button::new(tab_option.to_string()),
-                        );
+                        let response = ui.add(egui::Button::new(tab_option.to_string()));
 
                         if response.clicked() {
                             ui_visibility.settings_tab_option = tab_option;
