@@ -35,7 +35,6 @@ bevy = { version = "0.10.1", default-features = false, features = [
     "bevy_sprite",        # 2D (sprites) rendering
 
     "x11",     # Linux: Support X11 windowing system
-    "wayland", # Linux: Support Wayland windowing system
 
     "tonemapping_luts",
     "ktx2",             # preferred format for GPU textures
@@ -49,6 +48,9 @@ bevy = { version = "0.10.1", default-features = false, features = [
     # "filesystem_watcher", # Asset hot-reloading
     # "animation",          # Animation support
     # "serialize",          # Support for `serde` Serialize/Deserialize
+
+    ### Doesn't Work For Now:
+    # "wayland",            # Linux: Support Wayland windowing system
 
     ### Unused Features:
     # "android_shared_stdcxx",

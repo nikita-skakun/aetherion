@@ -1,5 +1,6 @@
 mod input;
 mod menu_focus;
+mod module;
 mod render_utils;
 mod settings;
 mod settings_io;
@@ -12,6 +13,7 @@ use bevy_egui::EguiPlugin;
 use bevy_pkv::PkvStore;
 use leafwing_input_manager::{prelude::InputManagerPlugin, InputManagerBundle};
 use menu_focus::CursorLockState;
+use module::spawn_module;
 use render_utils::update_window;
 use settings::*;
 use settings_io::*;
@@ -26,13 +28,20 @@ fn setup(
     graphics_settings: Res<GraphicsSettings>,
     cursor_lock_state: Res<CursorLockState>,
 ) {
-    // Sample Cube
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-        material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-        transform: Transform::from_xyz(0.0, 0.5, 0.0),
-        ..default()
-    });
+    // Test Module
+    let size = Vec3::new(1.0, 1.0, 1.0);
+    let position = Vec3::new(0.0, 1.0, 0.0);
+    let color = Color::rgb(0.8, 0.7, 0.6);
+    spawn_module(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        size,
+        position,
+        color,
+        false,
+    );
+
     // Light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
