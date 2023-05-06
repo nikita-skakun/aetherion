@@ -7,6 +7,7 @@ use leafwing_input_manager::{
 use crate::{input::Action, menu_focus::CursorLockState, settings::*};
 
 const CAMERA_MOVE_SPEED: f32 = 5.0;
+const CAMERA_BOOST_SPEED: f32 = 50.0;
 
 pub fn move_camera(
     time: Res<Time>,
@@ -30,8 +31,13 @@ pub fn move_camera(
             - action_state.pressed(Action::Forward) as i32) as f32,
     );
 
-    transform.translation +=
-        rotation * movement.normalize_or_zero() * time.delta_seconds() * CAMERA_MOVE_SPEED;
+    transform.translation += rotation
+        * movement.normalize_or_zero()
+        * time.delta_seconds()
+        * match action_state.pressed(Action::Sprint) {
+            true => CAMERA_BOOST_SPEED,
+            false => CAMERA_MOVE_SPEED,
+        };
 
     let mut delta_x = 0.0;
     let mut delta_y = 0.0;
@@ -77,6 +83,7 @@ impl SpectatorCameraBundle {
         input_map.insert(KeyCode::D, Right);
         input_map.insert(KeyCode::Space, Jump);
         input_map.insert(KeyCode::LControl, Crouch);
+        input_map.insert(KeyCode::LShift, Sprint);
 
         //Return
         input_map

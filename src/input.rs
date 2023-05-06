@@ -11,4 +11,5 @@ pub enum Action {
     Right,
     Jump,
     Crouch,
+    Sprint,
 }
