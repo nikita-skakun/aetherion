@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 #[derive(Component)]
 pub struct Size(pub Vec3);
@@ -13,8 +14,9 @@ pub fn spawn_module(
     size: Vec3,
     position: Vec3,
     color: Color,
+    velocity: Velocity,
     is_headless: bool,
-) {
+) -> Entity {
     if is_headless {
         commands.spawn((
             ModuleTag,
@@ -23,7 +25,10 @@ pub fn spawn_module(
                 transform: Transform::from_translation(position),
                 ..Default::default()
             },
-        ));
+            Collider::cuboid(size.x / 2.0, size.y / 2.0, size.z / 2.0),
+            RigidBody::Dynamic,
+            velocity,
+        )).id()
     } else {
         commands.spawn((
             ModuleTag,
@@ -41,6 +46,9 @@ pub fn spawn_module(
                 transform: Transform::from_translation(position),
                 ..Default::default()
             },
-        ));
+            Collider::cuboid(size.x / 2.0, size.y / 2.0, size.z / 2.0),
+            RigidBody::Dynamic,
+            velocity,
+        )).id()
     }
 }

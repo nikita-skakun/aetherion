@@ -34,7 +34,7 @@ bevy = { version = "0.10.1", default-features = false, features = [
     "bevy_text",          # Text/font rendering
     "bevy_sprite",        # 2D (sprites) rendering
 
-    "x11",     # Linux: Support X11 windowing system
+    "x11", # Linux: Support X11 windowing system
 
     "tonemapping_luts",
     "ktx2",             # preferred format for GPU textures
@@ -86,6 +86,7 @@ bevy_egui = { version = "0.20.2", default-features = false, features = [
     # "open_url",
 ] }
 bevy_pkv = "0.7.0"
+bevy_rapier3d = { version = "0.21.0", features = ["simd-stable"] }
 leafwing-input-manager = { version = "0.9.1", default-features = false, features = [
     ### Currently Used Features:
 
