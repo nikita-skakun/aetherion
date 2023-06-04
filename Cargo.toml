@@ -71,7 +71,7 @@ bevy = { version = "0.10.1", default-features = false, features = [
     # "wav",
 
     ### Development/Debug Features:
-    "dynamic_linking", # Dynamic linking for faster compile-times
+    # "dynamic_linking", # Dynamic linking for faster compile-times
     # "trace",           # Enable tracing for performance measurement
     # "trace_tracy",     # Tracing using `tracy`
     # "trace_chrome",    # Tracing using the Chrome format

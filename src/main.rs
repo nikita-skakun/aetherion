@@ -14,7 +14,7 @@ use bevy_pkv::PkvStore;
 use bevy_rapier3d::prelude::*;
 use leafwing_input_manager::{prelude::InputManagerPlugin, InputManagerBundle};
 use menu_focus::CursorLockState;
-use module::spawn_module;
+use module::{engine_system, spawn_base_module, ModuleEngineTag};
 use render_utils::update_window;
 use settings::*;
 use settings_io::*;
@@ -38,27 +38,37 @@ fn setup(
     cursor_lock_state: Res<CursorLockState>,
 ) {
     // Test Module
-    let module1 = spawn_module(
+    let module1 = spawn_base_module(
         &mut commands,
         &mut meshes,
         &mut materials,
         Vec3::new(1.0, 1.0, 1.0),
         Vec3::new(0.0, 1.0, 0.0),
+        Quat::IDENTITY,
         Color::rgb(0.8, 0.2, 0.2),
         Velocity::default(),
         IS_HEADLESS,
     );
 
-    let module2 = spawn_module(
+    let module2 = spawn_base_module(
         &mut commands,
         &mut meshes,
         &mut materials,
         Vec3::new(1.0, 1.0, 1.0),
         Vec3::new(1.0, 1.0, 0.0),
+        Quat::from_euler(EulerRot::XYZ, 0.0, 0.0, 0.0),
         Color::rgb(0.2, 0.8, 0.2),
         Velocity::default(),
         IS_HEADLESS,
     );
+
+    commands
+        .entity(module1)
+        .insert(ModuleEngineTag { thrust: 1.0 });
+
+    commands
+        .entity(module2)
+        .insert(ModuleEngineTag { thrust: 1.0 });
 
     let mut joint_data = FixedJointBuilder::new()
         .local_anchor1(Vec3::new(-0.5, 0.0, 0.0))
@@ -136,6 +146,6 @@ fn main() {
         .add_startup_system(update_window)
         .add_system(move_camera)
         .add_system(ui_menu)
-        // .add_system(cast_ray_system)
+        .add_system(engine_system)
         .run();
 }
