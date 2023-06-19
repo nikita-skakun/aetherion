@@ -96,4 +96,4 @@ leafwing-input-manager = { version = "0.9.1", default-features = false, features
 ] }
 serde = "1.0.160"
 strum = "0.24.1"
-strum_macros = "0.24.3"
+strum_macros = "0.25.0"
