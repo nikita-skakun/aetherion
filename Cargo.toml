@@ -24,7 +24,7 @@ inherits = "release"
 lto = "thin"
 
 [dependencies]
-bevy = { version = "0.10.1", default-features = false, features = [
+bevy = { version = "0.11.0", default-features = false, features = [
     ### Currently Used Features:
     "bevy_asset",         # Assets management
     "bevy_winit",         # Window management
