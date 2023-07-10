@@ -94,6 +94,6 @@ leafwing-input-manager = { version = "0.9.1", default-features = false, features
     # "egui",
     # "ui",
 ] }
-serde = "1.0.160"
+serde = "1.0.171"
 strum = "0.24.1"
 strum_macros = "0.24.3"
