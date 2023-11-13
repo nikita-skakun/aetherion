@@ -24,7 +24,7 @@ inherits = "release"
 lto = "thin"
 
 [dependencies]
-bevy = { version = "0.10.1", default-features = false, features = [
+bevy = { version = "0.12.0", default-features = false, features = [
     ### Currently Used Features:
     "bevy_asset",         # Assets management
     "bevy_winit",         # Window management
@@ -34,7 +34,8 @@ bevy = { version = "0.10.1", default-features = false, features = [
     "bevy_text",          # Text/font rendering
     "bevy_sprite",        # 2D (sprites) rendering
 
-    "x11", # Linux: Support X11 windowing system
+    "x11",     # Linux: Support X11 windowing system
+    "wayland", # Linux: Support Wayland windowing system
 
     "tonemapping_luts",
     "ktx2",             # preferred format for GPU textures
@@ -50,7 +51,6 @@ bevy = { version = "0.10.1", default-features = false, features = [
     # "serialize",          # Support for `serde` Serialize/Deserialize
 
     ### Doesn't Work For Now:
-    # "wayland",            # Linux: Support Wayland windowing system
 
     ### Unused Features:
     # "android_shared_stdcxx",
@@ -71,13 +71,13 @@ bevy = { version = "0.10.1", default-features = false, features = [
     # "wav",
 
     ### Development/Debug Features:
-    # "dynamic_linking", # Dynamic linking for faster compile-times
+    "dynamic_linking", # Dynamic linking for faster compile-times
     # "trace",           # Enable tracing for performance measurement
     # "trace_tracy",     # Tracing using `tracy`
     # "trace_chrome",    # Tracing using the Chrome format
     # "wgpu_trace",      # WGPU/rendering tracing
 ] }
-bevy_egui = { version = "0.20.2", default-features = false, features = [
+bevy_egui = { version = "0.23.0", default-features = false, features = [
     ### Currently Used Features:
     "default_fonts",
 
@@ -85,9 +85,9 @@ bevy_egui = { version = "0.20.2", default-features = false, features = [
     # "manage_clipboard",
     # "open_url",
 ] }
-bevy_pkv = "0.7.0"
-bevy_rapier3d = { version = "0.21.0", features = ["simd-stable"] }
-leafwing-input-manager = { version = "0.9.1", default-features = false, features = [
+bevy_pkv = "0.9.0"
+bevy_rapier3d = { version = "0.23.0", features = ["simd-stable"] }
+leafwing-input-manager = { version = "0.11.1", default-features = false, features = [
     ### Currently Used Features:
 
     ### Unused Features:
@@ -95,5 +95,5 @@ leafwing-input-manager = { version = "0.9.1", default-features = false, features
     # "ui",
 ] }
 serde = "1.0.160"
-strum = "0.24.1"
-strum_macros = "0.24.3"
+strum = "0.25.0"
+strum_macros = "0.25.3"

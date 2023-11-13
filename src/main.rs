@@ -110,24 +110,32 @@ fn setup(
     rapier_config.gravity = Vec3::ZERO;
 }
 
-// fn cast_ray_system(
-//     rapier_context: Res<RapierContext>,
-//     camera_query: Query<&GlobalTransform, With<Camera3d>>,
-// ) {
-//     for transform in camera_query.iter() {
-//         let max_toi = 4.0;
-//         if let Some((entity, toi)) = rapier_context.cast_ray(
-//             transform.translation(),
-//             transform.forward(),
-//             max_toi,
-//             true,
-//             QueryFilter::default(),
-//         ) {
-//             // The first collider hit
-//             println!("Hit entity: {:?}, toi: {}", entity, toi);
-//         }
-//     }
-// }
+fn cast_ray_system(
+    mut commands: Commands,
+    rapier_context: Res<RapierContext>,
+    camera_query: Query<&GlobalTransform, With<Camera3d>>,
+    time: Res<Time>,
+) {
+    for transform in camera_query.iter() {
+        if let Some((entity, _)) = rapier_context.cast_ray(
+            transform.translation(),
+            transform.forward(),
+            100.0,
+            true,
+            QueryFilter::default(),
+        ) {
+            // Apply force to hit entity
+            let force_magnitude = 100.0 * time.delta().as_secs_f32();
+            let force_direction = (transform.back()).normalize();
+            let force_vector = force_direction * force_magnitude;
+
+            commands.entity(entity).insert(ExternalForce {
+                force: force_vector,
+                torque: Vec3::ZERO,
+            });
+        }
+    }
+}
 
 fn main() {
     App::new()
@@ -137,15 +145,16 @@ fn main() {
         .insert_resource(GraphicsSettings::default())
         .insert_resource(UiVisibility::default())
         .add_plugins(DefaultPlugins)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugin(RapierDebugRenderPlugin::default())
-        .add_plugin(EguiPlugin)
-        .add_plugin(InputManagerPlugin::<input::Action>::default())
-        .add_startup_system(import_player_settings)
-        .add_startup_system(setup)
-        .add_startup_system(update_window)
-        .add_system(move_camera)
-        .add_system(ui_menu)
-        .add_system(engine_system)
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
+        .add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins(EguiPlugin)
+        .add_plugins(InputManagerPlugin::<input::Action>::default())
+        .add_systems(Startup, import_player_settings)
+        .add_systems(Startup, setup)
+        .add_systems(Startup, update_window)
+        .add_systems(Update, move_camera)
+        .add_systems(Update, ui_menu)
+        // .add_systems(Update, engine_system)
+        .add_systems(Update, cast_ray_system)
         .run();
 }

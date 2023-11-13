@@ -41,7 +41,7 @@ pub fn move_camera(
 
     let mut delta_x = 0.0;
     let mut delta_y = 0.0;
-    for ev in motion_evr.iter() {
+    for ev in motion_evr.read() {
         delta_x += ev.delta.x;
         delta_y += ev.delta.y;
     }
@@ -63,7 +63,6 @@ pub fn update_fov(mut query: Query<&mut Projection>, graphics_settings: &Graphic
 
 #[derive(Bundle)]
 pub struct SpectatorCameraBundle {
-    #[bundle]
     pub input_manager: InputManagerBundle<Action>,
     pub camera: Camera3dBundle,
 }
@@ -82,8 +81,8 @@ impl SpectatorCameraBundle {
         input_map.insert(KeyCode::A, Left);
         input_map.insert(KeyCode::D, Right);
         input_map.insert(KeyCode::Space, Jump);
-        input_map.insert(KeyCode::LControl, Crouch);
-        input_map.insert(KeyCode::LShift, Sprint);
+        input_map.insert(KeyCode::ControlLeft, Crouch);
+        input_map.insert(KeyCode::ShiftLeft, Sprint);
 
         //Return
         input_map
